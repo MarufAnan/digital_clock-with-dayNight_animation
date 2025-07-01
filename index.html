@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clock with Sun & Moon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      transition: background-color 0.3s, color 0.3s, background-image 0.3s;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100vh;
+      font-family: "Electrolize", sans-serif;
+      font-size: 10px;
+      position: relative;
+    }
+
+    body.light {
+      background-color: aliceblue;
+      background-image: url("day.png");
+      color: white;
+    }
+
+    body.dark {
+      background-color: #282c34;
+      background-image: url("night.png");
+      color: #61dafb;
+    }
+
+    /* Clock Container */
+    .container {
+      height: 50px;
+      width: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border: 10px solid black;
+      border-radius: 20px;
+      /* box-shadow: 2px 2px, 5px 5px, 10px 10px; */
+      position: absolute;
+      top: 370px;
+      background-color: #282c34;
+    }
+
+
+    @media (min-width: 768px) {
+      .container {
+        top: 470px;
+      }
+    }
+
+    .info {
+      height: 15px;
+      text-align: center;
+    }
+
+    .clock-container {
+      height: 15px;
+      width: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: px;
+    }
+
+    .date-container {
+      height: 15px;
+      width: 80px;
+      text-align: center;
+    }
+
+    .clock-container div {
+      height: 13px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .button {
+      transition: background-color 0.3s;
+      height: 5px;
+      width: 30px;
+      border-radius: 10px;
+      position: relative;
+      top: -13px;
+      z-index: -1;
+    }
+
+    body.light .button {
+      background-color: grey;
+    }
+
+    body.dark .button {
+      background-color: black;
+    }
+
+    .stand {
+      display: flex;
+      gap: 25px;
+      position: relative;
+      bottom: -14px;
+    }
+
+    .stand div {
+      transition: background-color 0.3s;
+      height: 5px;
+      width: 25px;
+      border-radius: 10px;
+    }
+
+    body.light .stand1,
+    body.light .stand2 {
+      background-color: grey;
+    }
+
+    body.dark .stand1,
+    body.dark .stand2 {
+      background-color: black;
+    }
+
+    #tooggle-button {
+      position: relative;
+      top: -100px;
+    }
+
+    #tooggle-button button {
+      font-family: "Electrolize", sans-serif;
+      border: 2px solid transparent;
+      background-color: transparent;
+      transition: background-image 0.3s;
+      background-repeat: no-repeat;
+      height: 50px;
+      width: 50px;
+    }
+
+    body.light button {
+      background-image: url("toggle-off-solid.svg");
+    }
+
+    body.dark button {
+      background-image: url("toggle-on-solid.svg");
+    }
+
+    /* Sun and Moon */
+    .sun,
+    .moon {
+      height: 40px;
+      width: 40px;
+      border-radius: 100%;
+      position: absolute;
+      top: 3vh;
+    }
+
+    .sun {
+      background-color: orange;
+      box-shadow: 0 0 100px 30px orangered;
+      left: 43vw;
+      display: none;
+    }
+
+    .moon {
+      background-color: #effaff;
+      box-shadow: 0 0 100px 40px #3864ad;
+      right: 42vw;
+      display: none;
+    }
+
+    body.light .sun {
+      display: block;
+    }
+
+    body.dark .moon {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Toggle Button -->
+  <div id="tooggle-button"><button></button></div>
+
+  <!-- Sun and Moon -->
+  <div class="sun"></div>
+  <div class="moon"></div>
+
+  <!-- Clock -->
+  <div class="container">
+    <div class="button"></div>
+    <div class="info">Digital Clock</div>
+    <div class="clock-container">
+      <div class="hour">00</div>:
+      <div class="minute">00</div>:
+      <div class="second">00</div>
+      <div class="ampm">AM</div>
+    </div>
+    <div class="date-container">
+      <div id="date">00/00/0000</div>
+    </div>
+    <div class="stand">
+      <div class="stand1"></div>
+      <div class="stand2"></div>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtnContainer = document.getElementById('tooggle-button');
+    const toggleBtn = toggleBtnContainer.querySelector('button');
+    const body = document.body;
+
+    // Initial mode setup
+    if (!body.classList.contains('dark') && !body.classList.contains('light')) {
+      body.classList.add('dark');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      body.classList.toggle('light');
+    });
+
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      let seconds = now.getSeconds();
+      let ampm = hours >= 12 ? 'PM' : 'AM';
+
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+
+      hours = pad(hours);
+      minutes = pad(minutes);
+      seconds = pad(seconds);
+
+      document.querySelector('.hour').innerText = hours;
+      document.querySelector('.minute').innerText = minutes;
+      document.querySelector('.second').innerText = seconds;
+      document.querySelector('.ampm').innerText = ampm;
+
+      const day = pad(now.getDate());
+      const month = pad(now.getMonth() + 1);
+      const year = now.getFullYear();
+      document.getElementById('date').innerText = `${day}/${month}/${year}`;
+    }
+
+    function pad(num) {
+      return num < 10 ? "0" + num : num;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+
+</html>
